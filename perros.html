@@ -124,29 +124,39 @@
 
         // Calculer le prix net pour 2 personnes sans annulation
         let prixNet2p = prixTTC2p / (1 + tauxTaxe + tauxTaxe * tauxTaxeDepartementale);
-        
+
         // Calculer la taxe de séjour pour 2 personnes sans annulation
-        let taxeSejour2p = Math.min(prixNet2p * tauxTaxe, nombreAdultes2 * plafondTaxe);
-        taxeSejour2p += taxeSejour2p * tauxTaxeDepartementale;
+        let taxeSejour2p = prixNet2p * tauxTaxe;
+
+        // Vérifier si la taxe de séjour dépasse ou est égale à 2 * 4.20€
+        if (taxeSejour2p >= 2 * plafondTaxe) {
+            // Si la taxe de séjour dépasse le seuil (8.40€), appliquer le plafond
+            prixNet2p = prixTTC2p - (2 * plafondTaxe * (1 + tauxTaxeDepartementale));
+        } else {
+            // Sinon, calculer le prix net sans dépasser la taxe de séjour
+            prixNet2p = prixTTC2p / (1 + tauxTaxe + tauxTaxe * tauxTaxeDepartementale);
+        }
+
+        // Calculer le prix net 2 personnes avec annulation à partir du prix net 2 personnes
+        let prixNet2pAnnul = prixNet2p / 0.9;  // Le prix net avec annulation est le prix net 2P / 0.9
 
         // Calculer le prix TTC avec annulation pour 2 personnes
-        let prixTTC2pAnnulation = prixTTC2p / 0.9;
+        let prixTTC2pAnnulation = prixNet2pAnnul * (1 + tauxTaxe + tauxTaxe * tauxTaxeDepartementale);
 
-        // Calculer le prix net avec annulation pour 2 personnes
-        let prixNet2pAnnul = prixTTC2pAnnulation / (1 + tauxTaxe + tauxTaxe * tauxTaxeDepartementale);
-
-        // Calculer la taxe de séjour avec annulation pour 2 personnes
-        let taxeSejour2pAnnul = Math.min(prixNet2pAnnul * tauxTaxe, nombreAdultes2 * plafondTaxe);
-        taxeSejour2pAnnul += taxeSejour2pAnnul * tauxTaxeDepartementale;
-
-        // Calculer le prix TTC pour 4 personnes avec annulation
-        let prixTTC4pAnnulation = prixTTC2pAnnulation / 0.85;
-
-        // Calculer le prix net pour 4 personnes avec annulation
-        let prixNet4pAnnul = prixTTC4pAnnulation / (1 + tauxTaxe + tauxTaxe * tauxTaxeDepartementale);
+        // Calculer le prix net pour 4 personnes avec annulation basé sur le prix net 2P avec annulation
+        let prixNet4pAnnul = prixNet2pAnnul / 0.85; // Le prix net 4P avec annulation est le prix net 2P avec annulation / 0.85
 
         // Calculer la taxe de séjour pour 4 personnes avec annulation
-        let taxeSejour4pAnnul = Math.min(prixNet4pAnnul * tauxTaxe, nombreAdultes4 * plafondTaxe);
+        let taxeSejour4pAnnul = prixNet4pAnnul * tauxTaxe;
+        if (taxeSejour4pAnnul >= 4 * plafondTaxe) {
+            // Si la taxe de séjour pour 4 personnes dépasse le seuil, utiliser le plafond
+            taxeSejour4pAnnul = nombreAdultes4 * plafondTaxe;
+        } else {
+            // Sinon, appliquer la taxe calculée sans dépasser le plafond
+            taxeSejour4pAnnul = Math.min(taxeSejour4pAnnul, nombreAdultes4 * plafondTaxe);
+        }
+
+        // Ajouter la taxe départementale de 10% à la taxe de séjour pour 4 personnes avec annulation
         taxeSejour4pAnnul += taxeSejour4pAnnul * tauxTaxeDepartementale;
 
         // Afficher les résultats
