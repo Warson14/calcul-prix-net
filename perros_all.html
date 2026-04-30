@@ -162,62 +162,65 @@
                 <p>Taxe de séjour 4P : €${taxe4p.toFixed(2)}</p>
             `;
         }
-        // -------------------------
-        //        AIRBNB
-        // -------------------------
-        if (plateforme === "airbnb") {
+// -------------------------
+//        AIRBNB (2P)
+// -------------------------
+if (plateforme === "airbnb") {
 
-            const commissionHote = 0.03;      // 3% sur l'hôte
-            const commissionVoyageur = 0.142; // 14.2% sur le prix hôte
+    const commissionHote = 0.03;      // 3%
+    const commissionVoyageur = 0.142; // 14.2%
 
-            // Prix client 2P (valeur saisie)
-            const prixClient2p = prixTTC2p;
+    // Prix client 2P (valeur saisie)
+    const prixClient2p = prixTTC2p;
 
-            // Prix hôte TTC 2P (ce que tu vends réellement la chambre, base taxe)
-            const prixHote2pTTC = prixClient2p / (1 + commissionVoyageur);
+    // Prix hôte TTC 2P (base taxe)
+    const prixHote2pTTC = prixClient2p / (1 + commissionVoyageur);
 
-            // Prix net 2P à partir du TTC hôte (sans part client)
-            let prixNet2pAirbnb = prixHote2pTTC / (1 + tauxTaxe + tauxTaxe * tauxTaxeDepartementale);
+    // Prix NET 2P = le prix que tu dois entrer sur Airbnb
+    let prixNet2pAirbnb = prixHote2pTTC / (1 + tauxTaxe + tauxTaxe * tauxTaxeDepartementale);
 
-            // Plafond taxe 2P (toujours sur la base hôte)
-            let taxeSejour2pAirbnb = prixNet2pAirbnb * tauxTaxe;
-            if (taxeSejour2pAirbnb >= 2 * plafondTaxe) {
-                prixNet2pAirbnb = prixHote2pTTC - (2 * plafondTaxe * (1 + tauxTaxeDepartementale));
-            }
+    // Plafond taxe 2P
+    let taxeSejour2pAirbnb = prixNet2pAirbnb * tauxTaxe;
+    if (taxeSejour2pAirbnb >= 2 * plafondTaxe) {
+        prixNet2pAirbnb = prixHote2pTTC - (2 * plafondTaxe * (1 + tauxTaxeDepartementale));
+    }
 
-            // On garde la même base pour 4P (comme ton script Booking)
-            let prixNet4pAirbnb = prixNet2pAirbnb;
+    // Taxe séjour 2P
+    let taxe2p = taxeSejour(prixNet2pAirbnb, 2);
 
-            // Taxe de séjour 4P (calculée sur le prix hôte, pas sur la part client)
-            let taxe4p = taxeSejour(prixNet4pAirbnb, 4);
+    // Commission hôte
+    const commissionHoteMontant = prixHote2pTTC * commissionHote;
 
-            // Prix hôte TTC 4P (base Airbnb)
-            const prixHote4pTTC = prixNet4pAirbnb + taxe4p;
+    // Payout hôte
+    const payoutHote = prixHote2pTTC - commissionHoteMontant;
 
-            // Payout hôte après commission 3%
-            const payoutHote = prixHote4pTTC * (1 - commissionHote);
+    // Prix client final (arrondi Airbnb)
+    const prixClientFinal = Math.round(prixHote2pTTC * (1 + commissionVoyageur));
 
-            // Prix client final 4P (affiché sur Airbnb)
-            const prixClient4p = prixHote4pTTC * (1 + commissionVoyageur);
+    prixFinal = prixClientFinal;
 
-            prixFinal = prixClient4p;
+    details = `
+        <h3>Détails Airbnb</h3>
 
-            details = `
-                <h3>Détails Airbnb</h3>
-                <p><strong>Prix client saisi (2P) :</strong> €${prixClient2p.toFixed(2)}</p>
-                <p>Prix hôte TTC 2P (base taxe) : €${prixHote2pTTC.toFixed(2)}</p>
-                <p>Prix net 2P : €${prixNet2pAirbnb.toFixed(2)}</p>
-                <hr>
-                <p>Prix net 4P : €${prixNet4pAirbnb.toFixed(2)}</p>
-                <p>Taxe de séjour 4P (base hôte) : €${taxe4p.toFixed(2)}</p>
-                <p>Prix hôte TTC 4P : €${prixHote4pTTC.toFixed(2)}</p>
-                <p>Commission hôte 3% : -€${(prixHote4pTTC * commissionHote).toFixed(2)}</p>
-                <p><strong>Payout hôte :</strong> €${payoutHote.toFixed(2)}</p>
-                <hr>
-                <p>Commission voyageur 14.2% : +€${(prixHote4pTTC * commissionVoyageur).toFixed(2)}</p>
-                <p><strong>Prix client final 4P (affiché sur Airbnb) :</strong> €${prixClient4p.toFixed(2)}</p>
-            `;
-        }
+        <p><strong>Prix client saisi (2P) :</strong> €${prixClient2p.toFixed(2)}</p>
+
+        <p><strong>Prix à entrer sur Airbnb (2P) :</strong>
+            <span class="highlight">€${prixNet2pAirbnb.toFixed(2)}</span>
+        </p>
+
+        <p>Prix hôte TTC (base taxe) : €${prixHote2pTTC.toFixed(2)}</p>
+        <p>Taxe de séjour 2P : €${taxe2p.toFixed(2)}</p>
+
+        <hr>
+        <p>Commission hôte 3% : -€${commissionHoteMontant.toFixed(2)}</p>
+        <p><strong>Payout hôte :</strong> €${payoutHote.toFixed(2)}</p>
+
+        <hr>
+        <p>Commission voyageur 14.2% : +€${(prixHote2pTTC * commissionVoyageur).toFixed(2)}</p>
+        <p><strong>Prix client final (affiché sur Airbnb) :</strong> €${prixClientFinal}</p>
+    `;
+}
+
 
 
         // -------------------------
