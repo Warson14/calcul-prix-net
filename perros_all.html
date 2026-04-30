@@ -152,6 +152,8 @@
 
             prixFinal = prixNet4pAnnul;
 
+            let taxe4p = taxeSejour(prixFinal, 4);
+
             details = `
                 <h3>Détails Booking</h3>
                 <p>Prix net 2P : €${prixNet2p.toFixed(2)}</p>
