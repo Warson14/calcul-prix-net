@@ -3,107 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calcul Prix Net Perros - Taxe de Séjour</title>
+    <title>Calcul Prix Net Perros - Multi-Plateforme</title>
+
     <style>
         body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f4f4f9;
+            font-family: Arial, sans-serif;
+            background: #f4f4f9;
             margin: 0;
             padding: 0;
         }
         .container {
-            width: 80%;
+            width: 90%;
             max-width: 800px;
-            margin: 50px auto;
-            padding: 20px;
-            background-color: #fff;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            margin: 40px auto;
+            background: white;
+            padding: 25px;
             border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
         }
         h1 {
             text-align: center;
             color: #4CAF50;
-        }
-        form {
-            margin: 20px 0;
-            display: flex;
-            flex-direction: column;
+            margin-top: 0;
         }
         label {
             font-size: 16px;
-            margin-bottom: 5px;
-            color: #333;
+            margin-top: 15px;
+            display: block;
         }
-        input {
+        select, input {
+            width: 100%;
             padding: 10px;
-            margin-bottom: 15px;
+            margin-top: 5px;
             font-size: 16px;
             border-radius: 5px;
-            border: 1px solid #ddd;
-            outline: none;
-        }
-        input:focus {
-            border-color: #4CAF50;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
         }
         button {
+            margin-top: 20px;
+            width: 100%;
             padding: 12px;
-            background-color: #4CAF50;
+            background: #4CAF50;
             color: white;
-            font-size: 18px;
             border: none;
+            font-size: 18px;
             border-radius: 5px;
             cursor: pointer;
-            transition: background-color 0.3s;
         }
         button:hover {
-            background-color: #45a049;
+            background: #45a049;
         }
         .result {
-            background-color: #f9f9f9;
+            margin-top: 25px;
             padding: 20px;
-            margin-top: 20px;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+            background: #f9f9f9;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.05);
         }
-        .result p {
-            font-size: 18px;
-            color: #333;
-            margin: 10px 0;
+        .result h3 {
+            margin-top: 15px;
+            margin-bottom: 8px;
         }
-        .result p span {
-            font-weight: bold;
-            color: #4CAF50;
-        }
-        .result .highlight {
-            font-weight: bold;
+        .highlight {
             color: red;
+            font-weight: bold;
         }
-        footer {
-            text-align: center;
-            margin-top: 30px;
-            color: #777;
+        hr {
+            margin: 12px 0;
+            border: none;
+            border-top: 1px solid #ddd;
         }
     </style>
 </head>
+
 <body>
 
 <div class="container">
-    <h1>Calcul du Prix Net - Perros-Guirec</h1>
-    <form id="calculForm">
-        <label for="prixTTC2p">Prix TTC pour 2 personnes sans annulation (€):</label>
-        <input type="number" id="prixTTC2p" name="prixTTC2p" required>
+    <h1>Calcul du Prix Net - Perros</h1>
 
-        <button type="button" onclick="calculerPrixNet()">Calculer le Prix à remplir sur Booking (4 pers avec annulation)</button>
-    </form>
+    <label for="plateforme">Plateforme :</label>
+    <select id="plateforme">
+        <option value="booking">Booking</option>
+        <option value="airbnb">Airbnb</option>
+        <option value="direct">Direct</option>
+    </select>
 
-    <div class="result" id="result">
-        <!-- Résultat sera affiché ici -->
-    </div>
+    <label for="prixTTC2p">Prix TTC pour 2 personnes (sans annulation) :</label>
+    <input type="number" id="prixTTC2p" step="0.01">
+
+    <button onclick="calculer()">Calculer</button>
+
+    <div class="result" id="result"></div>
 </div>
 
-<footer>
-    <p>Calculs basés sur un taux de taxe de séjour de 5% et un plafond de 4.20€/adulte.</p>
-</footer>
 <script>
     const tauxTaxe = 0.05;
     const plafondTaxe = 4.20;
@@ -132,7 +125,7 @@
             prixNet2p = prixTTC2p - (2 * plafondTaxe * (1 + tauxTaxeDepartementale));
         }
 
-        // Prix net 4P
+        // Prix net 4P (base commune)
         let prixNet4p = prixNet2p;
 
         // Taxe séjour 4P
@@ -165,13 +158,10 @@
         // -------------------------
         if (plateforme === "airbnb") {
 
-            const commissionHote = 0.03;     // 3%
+            const commissionHote = 0.03;      // 3%
             const commissionVoyageur = 0.142; // 14.2% exact
 
-            // Prix que tu dois mettre dans Airbnb
             let prixHote = prixNet4p / (1 - commissionHote);
-
-            // Prix payé par le client
             let prixClient = prixHote * (1 + commissionVoyageur);
 
             prixFinal = prixClient;
@@ -205,9 +195,6 @@
             `;
         }
 
-        // -------------------------
-        // AFFICHAGE FINAL
-        // -------------------------
         document.getElementById("result").innerHTML = `
             <p><strong>Plateforme :</strong> ${plateforme.toUpperCase()}</p>
             <p><strong>Prix final à afficher :</strong> <span class="highlight">€${prixFinal.toFixed(2)}</span></p>
