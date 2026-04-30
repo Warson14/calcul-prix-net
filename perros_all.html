@@ -111,18 +111,26 @@
     function calculer() {
         const prixTTC2p = parseFloat(document.getElementById("prixTTC2p").value);
         const plateforme = document.getElementById("plateforme").value;
-
-        if (!prixTTC2p || prixTTC2p <= 0) {
-            alert("Veuillez entrer un prix valide.");
+        
+        // Vérifier que le prix TTC pour 2 personnes est fourni
+        if (isNaN(prixTTC2p) || prixTTC2p <= 0) {
+            alert("Veuillez entrer un prix TTC valide pour 2 personnes sans annulation.");
             return;
         }
 
-        // Prix net 2P
+        // Calculer le prix net pour 2 personnes sans annulation
         let prixNet2p = prixTTC2p / (1 + tauxTaxe + tauxTaxe * tauxTaxeDepartementale);
 
-        // Plafond taxe 2P
-        if (prixNet2p * tauxTaxe >= 2 * plafondTaxe) {
+        // Calculer la taxe de séjour pour 2 personnes sans annulation
+        let taxeSejour2p = prixNet2p * tauxTaxe;
+
+        // Vérifier si la taxe de séjour dépasse ou est égale à 2 * 4.20€
+        if (taxeSejour2p >= 2 * plafondTaxe) {
+            // Si la taxe de séjour dépasse le seuil (8.40€), appliquer le plafond
             prixNet2p = prixTTC2p - (2 * plafondTaxe * (1 + tauxTaxeDepartementale));
+        } else {
+            // Sinon, calculer le prix net sans dépasser la taxe de séjour
+            prixNet2p = prixTTC2p / (1 + tauxTaxe + tauxTaxe * tauxTaxeDepartementale);
         }
 
         // Prix net 4P (base commune)
