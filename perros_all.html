@@ -176,7 +176,7 @@ if (plateforme === "airbnb") {
     // Prix hôte TTC 2P (base taxe)
     const prixHote2pTTC = prixClient2p / (1 + commissionVoyageur);
 
-    // Prix NET 2P = le prix que tu dois entrer sur Airbnb
+    // ⭐ Prix NET 2P = prix à entrer sur Airbnb
     let prixNet2pAirbnb = prixHote2pTTC / (1 + tauxTaxe + tauxTaxe * tauxTaxeDepartementale);
 
     // Plafond taxe 2P
@@ -188,14 +188,14 @@ if (plateforme === "airbnb") {
     // Taxe séjour 2P
     let taxe2p = taxeSejour(prixNet2pAirbnb, 2);
 
-    // Commission hôte
-    const commissionHoteMontant = prixHote2pTTC * commissionHote;
+    // Commission hôte (déduite APRÈS)
+    const commissionHoteMontant = prixNet2pAirbnb * commissionHote;
 
     // Payout hôte
-    const payoutHote = prixHote2pTTC - commissionHoteMontant;
+    const payoutHote = prixNet2pAirbnb - commissionHoteMontant;
 
     // Prix client final (arrondi Airbnb)
-    const prixClientFinal = Math.round(prixHote2pTTC * (1 + commissionVoyageur));
+    const prixClientFinal = Math.round(prixNet2pAirbnb * (1 + commissionVoyageur));
 
     prixFinal = prixClientFinal;
 
@@ -204,11 +204,10 @@ if (plateforme === "airbnb") {
 
         <p><strong>Prix client saisi (2P) :</strong> €${prixClient2p.toFixed(2)}</p>
 
-        <p><strong>Prix à entrer sur Airbnb (2P) :</strong>
+        <p><strong>Prix net hôte (2P) = Prix à entrer :</strong>
             <span class="highlight">€${prixNet2pAirbnb.toFixed(2)}</span>
         </p>
 
-        <p>Prix hôte TTC (base taxe) : €${prixHote2pTTC.toFixed(2)}</p>
         <p>Taxe de séjour 2P : €${taxe2p.toFixed(2)}</p>
 
         <hr>
@@ -216,10 +215,11 @@ if (plateforme === "airbnb") {
         <p><strong>Payout hôte :</strong> €${payoutHote.toFixed(2)}</p>
 
         <hr>
-        <p>Commission voyageur 14.2% : +€${(prixHote2pTTC * commissionVoyageur).toFixed(2)}</p>
+        <p>Commission voyageur 14.2% : +€${(prixNet2pAirbnb * commissionVoyageur).toFixed(2)}</p>
         <p><strong>Prix client final (affiché sur Airbnb) :</strong> €${prixClientFinal}</p>
     `;
 }
+
 
 
 
