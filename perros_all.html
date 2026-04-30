@@ -1,3 +1,109 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calcul Prix Net Perros - Taxe de Séjour</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 80%;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        h1 {
+            text-align: center;
+            color: #4CAF50;
+        }
+        form {
+            margin: 20px 0;
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            font-size: 16px;
+            margin-bottom: 5px;
+            color: #333;
+        }
+        input {
+            padding: 10px;
+            margin-bottom: 15px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            outline: none;
+        }
+        input:focus {
+            border-color: #4CAF50;
+        }
+        button {
+            padding: 12px;
+            background-color: #4CAF50;
+            color: white;
+            font-size: 18px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .result {
+            background-color: #f9f9f9;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+        }
+        .result p {
+            font-size: 18px;
+            color: #333;
+            margin: 10px 0;
+        }
+        .result p span {
+            font-weight: bold;
+            color: #4CAF50;
+        }
+        .result .highlight {
+            font-weight: bold;
+            color: red;
+        }
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Calcul du Prix Net - Perros-Guirec</h1>
+    <form id="calculForm">
+        <label for="prixTTC2p">Prix TTC pour 2 personnes sans annulation (€):</label>
+        <input type="number" id="prixTTC2p" name="prixTTC2p" required>
+
+        <button type="button" onclick="calculerPrixNet()">Calculer le Prix à remplir sur Booking (4 pers avec annulation)</button>
+    </form>
+
+    <div class="result" id="result">
+        <!-- Résultat sera affiché ici -->
+    </div>
+</div>
+
+<footer>
+    <p>Calculs basés sur un taux de taxe de séjour de 5% et un plafond de 4.20€/adulte.</p>
+</footer>
 <script>
     const tauxTaxe = 0.05;
     const plafondTaxe = 4.20;
