@@ -1,0 +1,113 @@
+<script>
+    const tauxTaxe = 0.05;
+    const plafondTaxe = 4.20;
+    const tauxTaxeDepartementale = 0.10;
+
+    function taxeSejour(prixNet, adultes) {
+        let taxe = prixNet * tauxTaxe;
+        taxe = Math.min(taxe, adultes * plafondTaxe);
+        return taxe + taxe * tauxTaxeDepartementale;
+    }
+
+    function calculer() {
+        const prixTTC2p = parseFloat(document.getElementById("prixTTC2p").value);
+        const plateforme = document.getElementById("plateforme").value;
+
+        if (!prixTTC2p || prixTTC2p <= 0) {
+            alert("Veuillez entrer un prix valide.");
+            return;
+        }
+
+        // Prix net 2P
+        let prixNet2p = prixTTC2p / (1 + tauxTaxe + tauxTaxe * tauxTaxeDepartementale);
+
+        // Plafond taxe 2P
+        if (prixNet2p * tauxTaxe >= 2 * plafondTaxe) {
+            prixNet2p = prixTTC2p - (2 * plafondTaxe * (1 + tauxTaxeDepartementale));
+        }
+
+        // Prix net 4P
+        let prixNet4p = prixNet2p;
+
+        // Taxe séjour 4P
+        let taxe4p = taxeSejour(prixNet4p, 4);
+
+        let prixFinal;
+        let details = "";
+
+        // -------------------------
+        //       BOOKING
+        // -------------------------
+        if (plateforme === "booking") {
+
+            let prixNet2pAnnul = prixNet2p / 0.9;
+            let prixNet4pAnnul = prixNet2pAnnul / 0.85;
+
+            prixFinal = prixNet4pAnnul;
+
+            details = `
+                <h3>Détails Booking</h3>
+                <p>Prix net 2P : €${prixNet2p.toFixed(2)}</p>
+                <p>Prix net 2P avec annulation (/0.9) : €${prixNet2pAnnul.toFixed(2)}</p>
+                <p>Prix net 4P avec annulation (/0.85) : €${prixNet4pAnnul.toFixed(2)}</p>
+                <p>Taxe de séjour 4P : €${taxe4p.toFixed(2)}</p>
+            `;
+        }
+
+        // -------------------------
+        //        AIRBNB
+        // -------------------------
+        if (plateforme === "airbnb") {
+
+            const commissionHote = 0.03;     // 3%
+            const commissionVoyageur = 0.142; // 14.2% exact
+
+            // Prix que tu dois mettre dans Airbnb
+            let prixHote = prixNet4p / (1 - commissionHote);
+
+            // Prix payé par le client
+            let prixClient = prixHote * (1 + commissionVoyageur);
+
+            prixFinal = prixClient;
+
+            details = `
+                <h3>Détails Airbnb</h3>
+                <p>Prix net 4P : €${prixNet4p.toFixed(2)}</p>
+                <p>Commission hôte (3%) : -€${(prixHote * commissionHote).toFixed(2)}</p>
+                <p><strong>Prix hôte (à saisir dans Airbnb) :</strong> €${prixHote.toFixed(2)}</p>
+                <hr>
+                <p>Commission voyageur (14.2%) : +€${(prixHote * commissionVoyageur).toFixed(2)}</p>
+                <p><strong>Prix client final (affiché sur Airbnb) :</strong> €${prixClient.toFixed(2)}</p>
+                <hr>
+                <p>Taxe de séjour 4P : €${taxe4p.toFixed(2)}</p>
+            `;
+        }
+
+        // -------------------------
+        //        DIRECT
+        // -------------------------
+        if (plateforme === "direct") {
+
+            prixFinal = prixNet4p;
+
+            details = `
+                <h3>Détails Direct</h3>
+                <p>Prix net 4P : €${prixNet4p.toFixed(2)}</p>
+                <p>Aucune commission appliquée.</p>
+                <p><strong>Prix final :</strong> €${prixNet4p.toFixed(2)}</p>
+                <p>Taxe de séjour 4P : €${taxe4p.toFixed(2)}</p>
+            `;
+        }
+
+        // -------------------------
+        // AFFICHAGE FINAL
+        // -------------------------
+        document.getElementById("result").innerHTML = `
+            <p><strong>Plateforme :</strong> ${plateforme.toUpperCase()}</p>
+            <p><strong>Prix final à afficher :</strong> <span class="highlight">€${prixFinal.toFixed(2)}</span></p>
+            <p><strong>Taxe de séjour (4 pers) :</strong> €${taxe4p.toFixed(2)}</p>
+            <hr>
+            ${details}
+        `;
+    }
+</script>
