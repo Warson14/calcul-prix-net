@@ -157,7 +157,7 @@
             const prixClientFinal = (prixNet2p + taxe2p);
 
             // 🔥 Commission Booking depuis pricing.json
-            const commissionBooking = CONFIG.plateformes["Booking"].commission[VILLE];
+            const commissionBooking = 0.17 ;
 
             // 🔥 Montant de la commission Booking
             let commissionBookingEuro = prixNet2p * (commissionBooking + 0.014) ;
@@ -172,7 +172,7 @@
             // -------------------------------------------------------
 
             // Commission Airbnb depuis pricing.json
-            const commissionHoteAirbnb = CONFIG.plateformes["AirBnb"].commission[VILLE]; // ex: 0.03
+            const commissionHoteAirbnb = 0.03; // ex: 0.03
             const commissionVoyageur = 0.1605;
 
             // Coefficient Airbnb (ce que tu gardes après commission)
