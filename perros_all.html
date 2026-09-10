@@ -179,13 +179,16 @@
 
             const coefAirbnb = 1 - (commissionHoteAirbnb * tvaAirbnb);
 
-            // Équivalent Airbnb à prix NET reçu identique à Booking (sans annulation)
-            const prixAEntrerEquivalentAirbnb = prixSansCommission / coefAirbnb;
-            const eqNet = calculAirbnb(prixAEntrerEquivalentAirbnb);
-
             // Équivalent Airbnb à prix NET reçu identique à Booking (avec annulation)
             const prixAEntrerEquivalentAirbnbAnnul = prixSansCommissionAnnul / coefAirbnb;
             const eqNetAnnul = calculAirbnb(prixAEntrerEquivalentAirbnbAnnul);
+            const prixAEntrerEquivalentAirbnbAnnulArrondi = Math.ceil(prixAEntrerEquivalentAirbnbAnnul);
+            const eqNetAnnulArrondi = calculAirbnb(prixAEntrerEquivalentAirbnbAnnulArrondi);
+
+            // Équivalent Airbnb à prix NET reçu identique à Booking (sans annulation)
+            // = arrondi avec annulation - 10%
+            const prixSansAnnulAirbnbNet = prixAEntrerEquivalentAirbnbAnnulArrondi * 0.9;
+            const eqNetSansAnnul = calculAirbnb(prixSansAnnulAirbnbNet);
 
             // Équivalent Airbnb à prix client BRUT identique à Booking (avec annulation)
             // (résolution directe, plus besoin d'itération : la relation est linéaire
@@ -253,18 +256,19 @@
                 <hr>
                 <h4>➡️ Équivalent Airbnb (prix Net reçu identique à Booking) </h4>
 
-                <p><strong>Sans annulation :</strong></p>
-                <p>Prix net souhaité (même que Booking) : €${prixSansCommission.toFixed(2)}</p>
-                <p><strong>Prix à entrer sur Airbnb pour toucher la même somme :</strong> <span style="color: green; font-weight: bold;">€${prixAEntrerEquivalentAirbnb.toFixed(2)}</span></p>
-                <p>Prix net Airbnb sans commission (obtenu) : €${eqNet.prixSansCommission.toFixed(2)}</p>
-                <p><strong>Prix client final sur Airbnb :</strong> €${eqNet.prixClientFinal.toFixed(2)}</p>
-
-                <hr>
                 <p><strong>Avec annulation :</strong></p>
                 <p>Prix net souhaité (même que Booking) : €${prixSansCommissionAnnul.toFixed(2)}</p>
-                <p><strong>Prix à entrer sur Airbnb pour toucher la même somme :</strong> <span style="color: green; font-weight: bold;">€${prixAEntrerEquivalentAirbnbAnnul.toFixed(2)}</span></p>
-                <p>Prix net Airbnb sans commission (obtenu) : €${eqNetAnnul.prixSansCommission.toFixed(2)}</p>
-                <p><strong>Prix client final sur Airbnb :</strong> €${eqNetAnnul.prixClientFinal.toFixed(2)}</p>
+                <p>Prix à entrer sur Airbnb : <strong>€${prixAEntrerEquivalentAirbnbAnnul.toFixed(2)}</strong></p>
+                <p>Prix à entrer sur Airbnb (Arrondi SUP): <span style="color: green; font-weight: bold;">€${prixAEntrerEquivalentAirbnbAnnulArrondi.toFixed(2)}</span></p>
+                <p>Prix net Airbnb sans commission : €${eqNetAnnulArrondi.prixSansCommission.toFixed(2)}</p>
+                <p>Prix client final Airbnb : €${eqNetAnnul.prixClientFinal.toFixed(2)}</p>
+                <p><strong>Prix client final sur Airbnb (Arrondi SUP):</strong> €${eqNetAnnulArrondi.prixClientFinal.toFixed(2)}</p>
+
+                <hr>
+                <p><strong>Sans annulation (= arrondi avec annulation − 10%) :</strong></p>
+                <p>Prix à entrer sur Airbnb : <span style="color: orange; font-weight: bold;">€${prixSansAnnulAirbnbNet.toFixed(2)}</span> (= €${prixAEntrerEquivalentAirbnbAnnulArrondi.toFixed(2)} − 10%)</p>
+                <p>Prix net Airbnb sans commission : €${eqNetSansAnnul.prixSansCommission.toFixed(2)}</p>
+                <p><strong>Prix client final sur Airbnb :</strong> €${eqNetSansAnnul.prixClientFinal.toFixed(2)}</p>
             `;
         }
 
