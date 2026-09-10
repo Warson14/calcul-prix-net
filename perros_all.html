@@ -276,100 +276,78 @@
             }
 
             // -------------------------
-            //        AIRBNB
+            //        AIRBNB (2P)
             // -------------------------
             if (plateforme === "airbnb") {
-                const prixClient2p = prixTTC2p;
-                const prixHote2pTTC = prixClient2p / (1 + commissionVoyageurAirbnb);
-                let prixNet2pAirbnb = prixHote2pTTC / (1 + tauxTaxe + tauxTaxe * tauxTaxeDepartementale);
-
-                let taxeSejour2pAirbnb = prixNet2pAirbnb * tauxTaxe;
-                if (taxeSejour2pAirbnb >= 2 * plafondTaxe) {
-                    prixNet2pAirbnb = prixHote2pTTC - (2 * plafondTaxe * (1 + tauxTaxeDepartementale));
+            
+                // Commission hôte (codée en dur, comme le reste du fichier — pas de CONFIG ici)
+                const commissionHote = 0.03;   // ex: 0.03
+                const tvaHote = 1.20;
+            
+                // Comme Booking : plus de frais voyageur séparé.
+                // La taxe de séjour s'ajoute par-dessus le prix déjà avec commission.
+                function calculAirbnb(prixEntrer) {
+                    const taxe = taxeSejour(prixEntrer, 2);
+                    const commissionEuro = prixEntrer * commissionHote * tvaHote;
+                    const prixSansCommission = prixEntrer - commissionEuro;
+                    const prixClientFinal = prixEntrer + taxe;
+                    return { prixEntrer, taxe, commissionEuro, prixSansCommission, prixClientFinal };
                 }
-
-                // Arrondi supérieur (avec annulation)
-                const prixAEntrerSup = ceilInt(prixNet2pAirbnb);
-                let taxeBruteSup = prixAEntrerSup * tauxTaxe;
-                if (taxeBruteSup >= 2 * plafondTaxe) taxeBruteSup = 2 * plafondTaxe;
-                const taxeSup = round2(taxeBruteSup * (1 + tauxTaxeDepartementale));
-                const commissionHoteSup = round2(prixAEntrerSup * commissionHoteAirbnb * 1.20);
-                const prixClientFinalSup = round2((prixAEntrerSup + taxeSup) * (1 + commissionVoyageurAirbnb));
-                const prixSansCommissionSup = round2(prixAEntrerSup - commissionHoteSup);
-
-                // **CALCULS POUR LE CAS AVEC ANNULATION (arrondi supérieur)**
-                const montantHoteAvecAnnulSup = round2(prixAEntrerSup * (1 - commissionHoteAirbnb));
-                // CORRECTION : Prix client final Airbnb = Prix Airbnb + Taxe finale
-                const prixClientFinalAirbnbAvecAnnulSup = round2(prixAEntrerSup + taxeSup);
-
-                // **CALCULS POUR LE CAS SANS ANNULATION (à partir du prix avec annulation - 10%)**
-                const prixAirbnbSansAnnulSup = round2(prixAEntrerSup * 0.90);
-                const montantHoteSansAnnulSup = round2(prixAirbnbSansAnnulSup * (1 - commissionHoteAirbnb));
-                const taxeInfoSansAnnulSup = taxeSejourPourPrix(prixAirbnbSansAnnulSup, 2);
-                // CORRECTION : Prix client final Airbnb = Prix Airbnb sans annulation + Taxe finale
-                const prixClientFinalAirbnbSansAnnulSup = round2(prixAirbnbSansAnnulSup + taxeInfoSansAnnulSup.taxeFinale);
-
-                // Arrondi inférieur (avec annulation)
-                const prixAEntrerInf = floorInt(prixNet2pAirbnb);
-                let taxeBruteInf = prixAEntrerInf * tauxTaxe;
-                if (taxeBruteInf >= 2 * plafondTaxe) taxeBruteInf = 2 * plafondTaxe;
-                const taxeInf = round2(taxeBruteInf * (1 + tauxTaxeDepartementale));
-                const commissionHoteInf = round2(prixAEntrerInf * commissionHoteAirbnb * 1.20);
-                const prixClientFinalInf = round2((prixAEntrerInf + taxeInf) * (1 + commissionVoyageurAirbnb));
-                const prixSansCommissionInf = round2(prixAEntrerInf - commissionHoteInf);
-
-                // **CALCULS POUR LE CAS AVEC ANNULATION (arrondi inférieur)**
-                const montantHoteAvecAnnulInf = round2(prixAEntrerInf * (1 - commissionHoteAirbnb));
-                // CORRECTION : Prix client final Airbnb = Prix Airbnb + Taxe finale
-                const prixClientFinalAirbnbAvecAnnulInf = round2(prixAEntrerInf + taxeInf);
-
-                // **CALCULS POUR LE CAS SANS ANNULATION (à partir du prix avec annulation - 10%)**
-                const prixAirbnbSansAnnulInf = round2(prixAEntrerInf * 0.90);
-                const montantHoteSansAnnulInf = round2(prixAirbnbSansAnnulInf * (1 - commissionHoteAirbnb));
-                const taxeInfoSansAnnulInf = taxeSejourPourPrix(prixAirbnbSansAnnulInf, 2);
-                // CORRECTION : Prix client final Airbnb = Prix Airbnb sans annulation + Taxe finale
-                const prixClientFinalAirbnbSansAnnulInf = round2(prixAirbnbSansAnnulInf + taxeInfoSansAnnulInf.taxeFinale);
-
+            
+                // Le prix saisi (prixNet2p) est le tarif SANS ANNULATION.
+                // On en déduit le prix standard (avec annulation possible) = /0.9 (+10%)
+                const prixStandardBrut = prixNet2p / 0.9;
+            
+                // Arrondi du prix STANDARD (c'est ce que l'hôte entre réellement sur Airbnb)
+                const prixStandardSup = Math.ceil(prixStandardBrut);
+                const prixStandardInf = Math.floor(prixStandardBrut);
+            
+                // Pour chaque arrondi du prix standard, on calcule le standard
+                // ET le sans-annulation qui en découle (-10% sur ce prix déjà arrondi)
+                function calculOption(prixStandardArrondi) {
+                    const standard = calculAirbnb(prixStandardArrondi);
+                    const prixSansAnnul = prixStandardArrondi * 0.9;
+                    const sansAnnul = calculAirbnb(prixSansAnnul);
+                    return { standard, sansAnnul, prixStandardArrondi };
+                }
+            
+                const optionSup = calculOption(prixStandardSup);
+                const optionInf = calculOption(prixStandardInf);
+            
+                function afficherOption(label, opt) {
+                    return `
+                        <h4>${label} : ${opt.prixStandardArrondi} €</h4>
+            
+                        <p><strong>Tarif standard (avec annulation possible)</strong></p>
+                        <p>Prix à entrer : <strong>${opt.prixStandardArrondi} €</strong></p>
+                        <p>Taxe de séjour : €${opt.standard.taxe.toFixed(2)}</p>
+                        <p>Commission hôte (${(commissionHote * 100).toFixed(1)}%) : €${opt.standard.commissionEuro.toFixed(2)}</p>
+                        <p>Prix net hôte (sans commission) : €${opt.standard.prixSansCommission.toFixed(2)}</p>
+                        <p><strong>Prix client final :</strong> €${opt.standard.prixClientFinal.toFixed(2)}</p>
+            
+                        <p style="margin-top:10px;"><strong>➡️ Tarif sans annulation généré automatiquement (-10%)</strong></p>
+                        <p>Prix résultant : €${opt.sansAnnul.prixEntrer.toFixed(2)} 
+                            (= ${opt.prixStandardArrondi} € − 10%)</p>
+                        <p>Taxe de séjour : €${opt.sansAnnul.taxe.toFixed(2)}</p>
+                        <p>Commission hôte : €${opt.sansAnnul.commissionEuro.toFixed(2)}</p>
+                        <p>Prix net hôte (sans commission) : €${opt.sansAnnul.prixSansCommission.toFixed(2)}</p>
+                        <p><strong>Prix client final sans annulation :</strong> 
+                            <span style="color: red; font-weight: bold;">€${opt.sansAnnul.prixClientFinal.toFixed(2)}</span>
+                        </p>
+                    `;
+                }
+            
                 details = `
                     <h3>Détails Airbnb</h3>
-                    <p><strong>Prix client saisi (2P) :</strong> €${prixClient2p.toFixed(2)}</p>
-                    <p><strong>Prix net hôte (avant arrondi) :</strong> €${prixNet2pAirbnb.toFixed(2)}</p>
+                    <p>Prix standard avant arrondi : €${prixStandardBrut.toFixed(2)}</p>
+            
                     <hr>
-
-                    <div class="recap">
-                        <h4>Option 1 : Arrondi supérieur</h4>
-                        <p><strong>Prix à entrer (avec annulation) :</strong> <span class="highlight-orange">€${prixAEntrerSup.toFixed(2)}</span></p>
-                        <p><strong>Montant hôte (avec annulation) :</strong> <span class="highlight-green">€${montantHoteAvecAnnulSup.toFixed(2)}</span></p>
-                        <p>Taxe séjour : €${taxeSup.toFixed(2)}</p>
-                        <p>Commission hôte : €${commissionHoteSup.toFixed(2)}</p>
-                        <p>Prix sans commission : €${prixSansCommissionSup.toFixed(2)}</p>
-                        <p><strong>Prix client final (avec annulation) :</strong> <span class="highlight-blue">€${prixClientFinalAirbnbAvecAnnulSup.toFixed(2)}</span></p>
-                        <hr>
-                        <p><strong>Prix Airbnb sans annulation (prix avec annulation - 10%) :</strong> <span class="highlight-blue">€${prixAirbnbSansAnnulSup.toFixed(2)}</span></p>
-                        <p><strong>Montant hôte (sans annulation) :</strong> <span class="highlight-green">€${montantHoteSansAnnulSup.toFixed(2)}</span></p>
-                        <p><strong>Taxe brute :</strong> €${taxeInfoSansAnnulSup.taxeBrute.toFixed(2)}</p>
-                        <p><strong>Taxe finale :</strong> €${taxeInfoSansAnnulSup.taxeFinale.toFixed(2)}</p>
-                        <p><strong>Prix client final Airbnb (sans annulation) :</strong> <span class="highlight">€${prixClientFinalAirbnbSansAnnulSup.toFixed(2)}</span></p>
-                    </div>
-
-                    <div class="recap">
-                        <h4>Option 2 : Arrondi inférieur</h4>
-                        <p><strong>Prix à entrer (avec annulation) :</strong> <span class="highlight-orange">€${prixAEntrerInf.toFixed(2)}</span></p>
-                        <p><strong>Montant hôte (avec annulation) :</strong> <span class="highlight-green">€${montantHoteAvecAnnulInf.toFixed(2)}</span></p>
-                        <p>Taxe séjour : €${taxeInf.toFixed(2)}</p>
-                        <p>Commission hôte : €${commissionHoteInf.toFixed(2)}</p>
-                        <p>Prix sans commission : €${prixSansCommissionInf.toFixed(2)}</p>
-                        <p><strong>Prix client final (avec annulation) :</strong> <span class="highlight-blue">€${prixClientFinalAirbnbAvecAnnulInf.toFixed(2)}</span></p>
-                        <hr>
-                        <p><strong>Prix Airbnb sans annulation (prix avec annulation - 10%) :</strong> <span class="highlight-blue">€${prixAirbnbSansAnnulInf.toFixed(2)}</span></p>
-                        <p><strong>Montant hôte (sans annulation) :</strong> <span class="highlight-green">€${montantHoteSansAnnulInf.toFixed(2)}</span></p>
-                        <p><strong>Taxe brute :</strong> €${taxeInfoSansAnnulInf.taxeBrute.toFixed(2)}</p>
-                        <p><strong>Taxe finale :</strong> €${taxeInfoSansAnnulInf.taxeFinale.toFixed(2)}</p>
-                        <p><strong>Prix client final Airbnb (sans annulation) :</strong> <span class="highlight">€${prixClientFinalAirbnbSansAnnulInf.toFixed(2)}</span></p>
-                    </div>
+                    ${afficherOption("Option 1 : Arrondi supérieur", optionSup)}
+            
+                    <hr>
+                    ${afficherOption("Option 2 : Arrondi inférieur", optionInf)}
                 `;
             }
-
             // -------------------------
             //        DIRECT
             // -------------------------
